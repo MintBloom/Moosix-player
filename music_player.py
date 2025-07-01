@@ -54,7 +54,7 @@ class Music:
         for song in self.songs:
             audio_file_list.insert("end", song)
         audio_file_list.selection_set(0)
-        self.current_song = self.songs[audio_file_list.curselection()[0]]
+        self.current_song = self.songs[audio_file_list.curselection()] #TypeError here
 
 music = Music()
 
