@@ -25,18 +25,6 @@ img_pause_bttn = PhotoImage(file="Images/Pause.png")
 img_next_bttn = PhotoImage(file="Images/Next.png")
 img_previous_bttn = PhotoImage(file="Images/Previous.png")
 
-#buttons
-play_bttn = Button(control_frame, image=img_play_bttn, borderwidth=0)
-pause_bttn = Button(control_frame, image=img_pause_bttn, borderwidth=0)
-next_bttn = Button(control_frame, image=img_next_bttn, borderwidth=0)
-previous_bttn = Button(control_frame, image=img_previous_bttn, borderwidth=0)
-
-#actual buttons on the application window
-play_bttn.grid(row=0, column=1, padx=1, pady=0)
-pause_bttn.grid(row=0, column=2, padx=1, pady=0)
-next_bttn.grid(row=0, column=3, padx=1, pady=0)
-previous_bttn.grid(row=0, column=0, padx=1, pady=0)
-
 class Music:
     def __init__(self, songs=[], current_song="", paused=False):
         self.songs = songs
@@ -47,16 +35,61 @@ class Music:
         #opens file manager to pick a folder
         root.directory = filedialog.askdirectory()
         for song in os.listdir(root.directory):
-            ext = os.path.splitext(song)
-            if ext in (".mp3", ".mp4"):
+            name, ext = os.path.splitext(song)
+            if ext in (".mp3"):
                 self.songs.append(song)
             # error handling here
         for song in self.songs:
             audio_file_list.insert("end", song)
         audio_file_list.selection_set(0)
-        self.current_song = self.songs[audio_file_list.curselection()] #TypeError here
+        self.current_song = self.songs[audio_file_list.curselection()[0]]
+
+    def play_audio(self):
+        #play audio if not already playing
+        if not self.paused:
+            pygame.mixer.music.load(os.path.join(root.directory, self.current_song))
+            pygame.mixer.music.play()
+        else:
+            pygame.mixer.music.unpause()
+            self.paused = False
+
+    def pause_audio(self):
+        #pause audio
+        pygame.mixer.music.pause()
+        self.paused = True
+
+    def next_track(self):
+        #will update current song to the next song in the queue and play it
+        try:
+            audio_file_list.selection_clear(0, END)
+            audio_file_list.selection_set(self.songs.index(self.current_song) + 1)
+            self.current_song = self.songs[audio_file_list.curselection()[0]]
+            self.play_audio()
+        except:
+            pass #if there is no next song, nothing will happen
+
+    def previous_track(self):
+        try:
+            audio_file_list.selection_clear(0, END)
+            audio_file_list.selection_set(self.songs.index(self.current_song) - 1)
+            self.current_song = self.songs[audio_file_list.curselection()[0]]
+            self.play_audio()
+        except:
+            pass
 
 music = Music()
+
+#buttons
+play_bttn = Button(control_frame, image=img_play_bttn, borderwidth=0, command=music.play_audio)
+pause_bttn = Button(control_frame, image=img_pause_bttn, borderwidth=0, command=music.pause_audio)
+next_bttn = Button(control_frame, image=img_next_bttn, borderwidth=0, command=music.next_track)
+previous_bttn = Button(control_frame, image=img_previous_bttn, borderwidth=0, command=music.previous_track)
+
+#actual buttons on the application window
+play_bttn.grid(row=0, column=1, padx=1, pady=0)
+pause_bttn.grid(row=0, column=2, padx=1, pady=0)
+next_bttn.grid(row=0, column=3, padx=1, pady=0)
+previous_bttn.grid(row=0, column=0, padx=1, pady=0)
 
 organise_menu = Menu(menu_bar, tearoff=False) #organise menu created
 menu_bar.add_cascade(label="Organise", menu=organise_menu) #organise menu added to menu bar
