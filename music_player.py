@@ -1,10 +1,14 @@
-from tkinter import filedialog
+import tkinter
+import customtkinter
+from tkinter import filedialog, ttk
 from tkinter import *
 import os, pygame
+import math, time
+from threading import *
 
 root = Tk()
 root.title("Audio Player") #application title
-root.geometry("700x400") #window startup size in pixels
+root.geometry("700x700") #window startup size in pixels
 
 pygame.mixer.init() #allows audio to played
 
@@ -36,7 +40,7 @@ class Music:
         root.directory = filedialog.askdirectory()
         for song in os.listdir(root.directory):
             name, ext = os.path.splitext(song)
-            if ext in (".mp3"):
+            if ext in (".mp3", ".WAV", ".OGG"):
                 self.songs.append(song)
             # error handling here
         for song in self.songs:
@@ -46,6 +50,7 @@ class Music:
 
     def play_audio(self):
         #play audio if not already playing
+        self.threading()
         if not self.paused:
             pygame.mixer.music.load(os.path.join(root.directory, self.current_song))
             pygame.mixer.music.play()
@@ -77,6 +82,17 @@ class Music:
         except:
             pass
 
+    def threading(self):
+        t1 = Thread(target=self.audio_progress())
+        t1.start
+
+    def audio_progress(self):
+        a = pygame.mixer.Sound(self.current_song)
+        song_length = a.get_length()*3
+        for i in range(0, math.ceil(song_length)):
+            time.sleep(.4)
+            progress_bar.set(pygame.mixer.music.get_pos() / 1000000)
+
 music = Music()
 
 #buttons
@@ -84,6 +100,10 @@ play_bttn = Button(control_frame, image=img_play_bttn, borderwidth=0, command=mu
 pause_bttn = Button(control_frame, image=img_pause_bttn, borderwidth=0, command=music.pause_audio)
 next_bttn = Button(control_frame, image=img_next_bttn, borderwidth=0, command=music.next_track)
 previous_bttn = Button(control_frame, image=img_previous_bttn, borderwidth=0, command=music.previous_track)
+
+#progress bar
+progress_bar = customtkinter.CTkProgressBar(master=root, progress_color='#32a85a', width=250)
+progress_bar.place(relx=.5, rely=.95, anchor=tkinter.CENTER)
 
 #actual buttons on the application window
 play_bttn.grid(row=0, column=1, padx=1, pady=0)
