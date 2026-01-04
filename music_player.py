@@ -32,7 +32,7 @@ img_previous_bttn = PhotoImage(file="Images/Previous.png")
 class Music:
     def __init__(self, songs=[], current_song="", paused=False):
         self.songs = songs
-        self.current_song = current_song
+        self.current_song = current_song # full path of the current song
         self.paused = paused
 
     def load_audio(self):
@@ -41,7 +41,9 @@ class Music:
         for song in os.listdir(root.directory):
             name, ext = os.path.splitext(song)
             if ext in (".mp3", ".WAV", ".OGG"):
-                self.songs.append(song)
+                full_path = os.path.join(root.directory, song)
+                self.songs.append(full_path)
+                audio_file_list.insert("end", song)
             # error handling here
         for song in self.songs:
             audio_file_list.insert("end", song)
@@ -52,7 +54,7 @@ class Music:
         #play audio if not already playing
         self.threading()
         if not self.paused:
-            pygame.mixer.music.load(os.path.join(root.directory, self.current_song))
+            pygame.mixer.music.load(self.current_song)
             pygame.mixer.music.play()
         else:
             pygame.mixer.music.unpause()
@@ -83,7 +85,7 @@ class Music:
             pass
 
     def threading(self):
-        t1 = Thread(target=self.audio_progress())
+        t1 = Thread(target=self.audio_progress, daemon=True)
         t1.start
 
     def audio_progress(self):
