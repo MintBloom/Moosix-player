@@ -36,19 +36,30 @@ class Music:
         self.paused = paused
 
     def load_audio(self):
-        #opens file manager to pick a folder
         root.directory = filedialog.askdirectory()
+        if not root.directory:
+            return  # user cancelled
+        self.songs.clear()
+        audio_file_list.delete(0, END)
         for song in os.listdir(root.directory):
             name, ext = os.path.splitext(song)
-            if ext in (".mp3", ".WAV", ".OGG"):
+            if ext.lower() in (".mp3", ".wav", ".ogg"):
                 full_path = os.path.join(root.directory, song)
+                # Store FULL path internally
                 self.songs.append(full_path)
+                # Display only filename in the listbox
                 audio_file_list.insert("end", song)
-            # error handling here
-        for song in self.songs:
-            audio_file_list.insert("end", song)
-        audio_file_list.selection_set(0)
-        self.current_song = self.songs[audio_file_list.curselection()[0]]
+        if self.songs:
+            audio_file_list.selection_set(0)
+            self.current_song = self.songs[0]
+        # Bind clicking a song in the listbox to the play function
+        audio_file_list.bind("<ButtonRelease-1>", self.song_selected)
+
+    def song_selected(self, event):
+        selected_index = audio_file_list.curselection()
+        if selected_index:
+            self.current_song = self.songs[selected_index[0]]
+            self.play_audio()
 
     def play_audio(self):
         #play audio if not already playing
@@ -56,6 +67,8 @@ class Music:
         if not self.paused:
             pygame.mixer.music.load(self.current_song)
             pygame.mixer.music.play()
+            # Check if the song is playing and start the next track when it finishes
+            pygame.mixer.music.set_endevent(pygame.USEREVENT)  # Custom event when song ends
         else:
             pygame.mixer.music.unpause()
             self.paused = False
@@ -68,9 +81,11 @@ class Music:
     def next_track(self):
         #will update current song to the next song in the queue and play it
         try:
+            current_index = self.songs.index(self.current_song)
+            next_index = current_index + 1 if current_index + 1 < len(self.songs) else 0
+            self.current_song = self.songs[next_index]
             audio_file_list.selection_clear(0, END)
-            audio_file_list.selection_set(self.songs.index(self.current_song) + 1)
-            self.current_song = self.songs[audio_file_list.curselection()[0]]
+            audio_file_list.selection_set(next_index)
             self.play_audio()
         except:
             pass #if there is no next song, nothing will happen
@@ -89,11 +104,14 @@ class Music:
         t1.start
 
     def audio_progress(self):
-        a = pygame.mixer.Sound(self.current_song)
-        song_length = a.get_length()*3
-        for i in range(0, math.ceil(song_length)):
-            time.sleep(.4)
-            progress_bar.set(pygame.mixer.music.get_pos() / 1000000)
+        # While the current song is playing
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.4)  # Update every 0.4 seconds
+            progress_bar.set(pygame.mixer.music.get_pos() / 1000000)  # Update progress bar
+        
+        # Once the current song finishes, play the next track
+        self.next_track()
+
 
 music = Music()
 
