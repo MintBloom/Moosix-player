@@ -1,9 +1,22 @@
-# Moosix-player
-Audio file player application. As of the making of this project I am currently using Fedora Linux which does not have a great default media player, so I have tried to make my own one!
+# Music Player Project 
+Audio file player application. Can run mp3, WAV and OGG files. 
+<br>
 
-## Application Window
+![Image of the Audio Player](Images/audioPlayerSS1.png)   ![Image of the Audio Player with files selected](Images/audioPlayerSS2.png)
 
-## Inner Workings
+## About
+
+
+## Features
+
+
+## Setup
+
+
+## Usage
 
 
 ## Challenges
+
+
+## Future Improvements
