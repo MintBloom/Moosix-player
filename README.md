@@ -20,7 +20,7 @@ Install the source code and "Images" folder (with images) and make sure both ite
 ## Usage
 Click the Organize button, another window will pop up allowing you to choose a folder with audio files in it. Make sure the filepath shown is correct before clicking Ok. Now you can play and pause the audio with the corresponding buttons and go to the previous track, or next track, by using the left and right arrow buttons respectively. You may also click on any file name in the application to start playing it. 
 
-## Challenges
+## Challenges and Lessons Learned
 
 
 ## Future Improvements
